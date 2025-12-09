@@ -1,0 +1,59 @@
+# Dependencies
+node_modules/
+*.egg-info/
+dist/
+build/
+
+# Virtual Environments
+venv/
+env/
+ENV/
+.venv
+
+# Environment Files
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Logs
+*.log
+logs/
+
+# Runtime
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.pytest_cache/
+.coverage
+htmlcov/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Next.js
+.next/
+out/
+
+# Docker
+docker-compose.override.yml
+
+# Models
+models/
+*.pkl
+*.pth
+
+# Temporary files
+tmp/
+temp/
+*.tmp
