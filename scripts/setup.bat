@@ -3,7 +3,7 @@ REM Setup script for InfiniteFlow AI development environment (Windows)
 
 setlocal enabledelayedexpansion
 
-echo 🚀 Setting up InfiniteFlow AI...
+echo  Setting up InfiniteFlow AI...
 echo.
 
 REM Check prerequisites

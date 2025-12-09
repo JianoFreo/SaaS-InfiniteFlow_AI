@@ -25,7 +25,7 @@ async function handleFileSelect(e) {
 
         // Simulate processing
         setTimeout(() => {
-            updateStatusMessage('🚀 Processing with AI...', 'Generating interpolated frames');
+            updateStatusMessage(' Processing with AI...', 'Generating interpolated frames');
             let processingProgress = 40;
             const processingInterval = setInterval(() => {
                 processingProgress += Math.random() * 15;

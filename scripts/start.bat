@@ -10,7 +10,7 @@ echo ║                 Production Startup                     ║
 echo ╚════════════════════════════════════════════════════════╝
 echo.
 
-echo 🚀 Starting InfiniteFlow AI Production Services...
+echo  Starting InfiniteFlow AI Production Services...
 echo.
 
 REM Check prerequisites
