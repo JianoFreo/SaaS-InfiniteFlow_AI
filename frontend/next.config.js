@@ -1,10 +1,9 @@
-import type { Config } from 'next'
-
-const config: Config = {
+const config = {
   reactStrictMode: true,
   swcMinify: true,
   images: {
     unoptimized: true,
   },
 }
-export default config
+
+module.exports = config

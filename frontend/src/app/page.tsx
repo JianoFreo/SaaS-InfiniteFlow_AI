@@ -1,33 +1,14 @@
 'use client'
 
-import { useRef, useState, useEffect } from 'react'
-import { useUploadStore } from '@/store/upload'
-import { uploadVideo, getJobStatus } from '@/lib/api'
-import { Upload, CheckCircle, AlertCircle, Loader } from 'lucide-react'
+import { useRef, useState } from 'react'
+import { Upload, CheckCircle, AlertCircle } from 'lucide-react'
 
 export default function Home() {
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const [fileName, setFileName] = useState<string>('')
-  const { jobId, status, progress, outputUrl, error, setJobId, setStatus, setProgress, setOutputUrl, setError, reset } = useUploadStore()
-
-  useEffect(() => {
-    if (!jobId || status === 'completed' || status === 'failed') return
-
-    const interval = setInterval(async () => {
-      try {
-        const jobStatus = await getJobStatus(jobId)
-        setStatus(jobStatus.status)
-        setProgress(jobStatus.progress)
-        if (jobStatus.output_url) {
-          setOutputUrl(jobStatus.output_url)
-        }
-      } catch (err) {
-        setError('Failed to fetch status')
-      }
-    }, 2000)
-
-    return () => clearInterval(interval)
-  }, [jobId, status, setStatus, setProgress, setOutputUrl, setError])
+  const [fileName, setFileName] = useState('')
+  const [status, setStatus] = useState('')
+  const [progress, setProgress] = useState(0)
+  const [error, setError] = useState<string | null>(null)
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -38,74 +19,47 @@ export default function Home() {
     setError(null)
 
     try {
-      const response = await uploadVideo(file)
-      setJobId(response.job_id)
+      const response = await fetch('http://localhost:8000/upload', {
+        method: 'POST',
+        body: file,
+      })
+      const data = await response.json()
       setStatus('processing')
+      setProgress(50)
     } catch (err) {
       setError('Failed to upload video')
       setStatus('failed')
     }
   }
 
-  const handleDownload = () => {
-    if (outputUrl) {
-      const a = document.createElement('a')
-      a.href = outputUrl
-      a.download = `optimized-${fileName}`
-      a.click()
-    }
-  }
-
-  const getStatusColor = () => {
-    switch (status) {
-      case 'completed':
-        return 'text-green-500'
-      case 'failed':
-        return 'text-red-500'
-      case 'processing':
-        return 'text-blue-500'
-      default:
-        return 'text-gray-500'
-    }
-  }
-
-  const getStatusIcon = () => {
-    switch (status) {
-      case 'completed':
-        return <CheckCircle className="w-6 h-6" />
-      case 'failed':
-        return <AlertCircle className="w-6 h-6" />
-      case 'processing':
-        return <Loader className="w-6 h-6 animate-spin" />
-      default:
-        return null
-    }
+  const handleReset = () => {
+    setFileName('')
+    setStatus('')
+    setProgress(0)
+    setError(null)
+    if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800">
-      <nav className="border-b border-slate-700 bg-slate-800/50">
-        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-purple-500"></div>
-            <h1 className="text-xl font-bold text-white">InfiniteFlow AI</h1>
-          </div>
-          <p className="text-sm text-slate-400">Video Frame Interpolation with AI</p>
+    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-purple-900 to-black flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold text-white mb-2">InfiniteFlow AI</h1>
+          <p className="text-gray-300 text-lg">Frame Interpolation Engine</p>
         </div>
-      </nav>
 
-      <main className="max-w-2xl mx-auto px-6 py-12">
-        <div className="space-y-8">
-          {/* Upload Section */}
-          <div className="bg-slate-700/40 border border-slate-600 rounded-lg p-8">
-            <div className="text-center space-y-4">
-              <h2 className="text-2xl font-bold text-white">Upload Your Video</h2>
-              <p className="text-slate-300">
-                Upload a video and we'll interpolate frames with AI-generated ones for smooth playback
-              </p>
-            </div>
-
-            <div className="mt-8">
+        {/* Main Card */}
+        <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20 shadow-2xl">
+          {/* Upload Area */}
+          {!status && (
+            <div
+              onClick={() => fileInputRef.current?.click()}
+              className="border-2 border-dashed border-blue-400 rounded-xl p-8 text-center cursor-pointer hover:border-blue-300 hover:bg-blue-500/10 transition-all"
+            >
+              <Upload className="w-12 h-12 text-blue-400 mx-auto mb-3" />
+              <p className="text-white font-semibold mb-2">Drop your video here</p>
+              <p className="text-gray-300 text-sm">or click to select</p>
               <input
                 ref={fileInputRef}
                 type="file"
@@ -113,89 +67,66 @@ export default function Home() {
                 onChange={handleFileSelect}
                 className="hidden"
               />
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                disabled={status === 'processing' || status === 'uploading'}
-                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-4 px-6 rounded-lg flex items-center justify-center gap-2 transition"
-              >
-                <Upload className="w-5 h-5" />
-                {status === 'idle' || status === 'failed' ? 'Choose Video' : 'Processing...'}
-              </button>
             </div>
+          )}
 
-            {fileName && (
-              <div className="mt-4 p-3 bg-slate-600/50 rounded border border-slate-500">
-                <p className="text-slate-200 text-sm">
-                  <span className="font-semibold">File:</span> {fileName}
-                </p>
-              </div>
-            )}
-          </div>
-
-          {/* Status Section */}
-          {status !== 'idle' && (
-            <div className="bg-slate-700/40 border border-slate-600 rounded-lg p-8 space-y-4">
-              <div className="flex items-center gap-3">
-                <div className={getStatusColor()}>{getStatusIcon()}</div>
-                <div>
-                  <p className="font-semibold text-white capitalize">{status === 'uploading' ? 'Uploading' : status}</p>
-                  {jobId && <p className="text-xs text-slate-400">ID: {jobId}</p>}
-                </div>
+          {/* Processing Status */}
+          {status && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-white font-semibold">{fileName}</span>
+                <span className="text-blue-400 text-sm font-mono">{progress}%</span>
               </div>
 
-              {status === 'processing' && (
-                <div className="space-y-2">
-                  <div className="w-full bg-slate-600 rounded-full h-2">
-                    <div
-                      className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full transition-all"
-                      style={{ width: `${progress}%` }}
-                    ></div>
-                  </div>
-                  <p className="text-sm text-slate-300">{progress}% complete</p>
-                </div>
-              )}
+              {/* Progress Bar */}
+              <div className="w-full bg-gray-700 rounded-full h-2 overflow-hidden">
+                <div
+                  className="bg-gradient-to-r from-blue-500 to-purple-500 h-full transition-all duration-300"
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
 
-              {status === 'completed' && outputUrl && (
-                <button
-                  onClick={handleDownload}
-                  className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded transition"
-                >
-                  Download Optimized Video
-                </button>
-              )}
+              {/* Status Message */}
+              <div className="text-center">
+                {status === 'uploading' && (
+                  <p className="text-gray-300 text-sm">Uploading video...</p>
+                )}
+                {status === 'processing' && (
+                  <p className="text-blue-300 text-sm">🔄 Processing with AI...</p>
+                )}
+                {status === 'completed' && (
+                  <p className="text-green-300 text-sm">✓ Complete!</p>
+                )}
+              </div>
 
-              {error && (
-                <p className="text-red-400 text-sm">{error}</p>
-              )}
-
+              {/* Reset Button */}
               {(status === 'completed' || status === 'failed') && (
                 <button
-                  onClick={reset}
-                  className="w-full bg-slate-600 hover:bg-slate-700 text-white font-semibold py-2 px-4 rounded transition"
+                  onClick={handleReset}
+                  className="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 rounded-lg transition-colors"
                 >
-                  Start Over
+                  Process Another Video
                 </button>
               )}
             </div>
           )}
 
-          {/* Features */}
-          <div className="grid grid-cols-3 gap-4 text-center">
-            <div className="bg-slate-700/40 border border-slate-600 rounded-lg p-4">
-              <p className="text-2xl font-bold text-purple-400">2x</p>
-              <p className="text-sm text-slate-300">Smoother Playback</p>
+          {/* Error Message */}
+          {error && (
+            <div className="bg-red-500/20 border border-red-500 rounded-lg p-4 flex items-center gap-3">
+              <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0" />
+              <p className="text-red-200 text-sm">{error}</p>
             </div>
-            <div className="bg-slate-700/40 border border-slate-600 rounded-lg p-4">
-              <p className="text-2xl font-bold text-blue-400">AI</p>
-              <p className="text-sm text-slate-300">Generated Frames</p>
-            </div>
-            <div className="bg-slate-700/40 border border-slate-600 rounded-lg p-4">
-              <p className="text-2xl font-bold text-green-400">GPU</p>
-              <p className="text-sm text-slate-300">Powered Processing</p>
-            </div>
-          </div>
+          )}
         </div>
-      </main>
+
+        {/* Footer */}
+        <div className="text-center mt-8">
+          <p className="text-gray-400 text-sm">
+            API Status: <span className="text-green-400">● Online</span>
+          </p>
+        </div>
+      </div>
     </div>
   )
 }

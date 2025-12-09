@@ -4,8 +4,13 @@ from app.core.config import get_settings
 from app.routes import health, processing
 from app.core.database import Base, engine
 
-# Create tables
-Base.metadata.create_all(bind=engine)
+# Create tables only if engine is available
+if engine is not None:
+    try:
+        Base.metadata.create_all(bind=engine)
+    except Exception as e:
+        print(f"Warning: Could not create database tables: {e}")
+
 
 settings = get_settings()
 
