@@ -224,18 +224,18 @@ SaaS-InfiniteFlow_AI/
 
 ## Features
 
-- ✅ Video upload and processing
-- ✅ Real-time progress tracking
-- ✅ Frame interpolation with AI
-- ✅ Async job queue
-- ✅ PostgreSQL persistence
-- ✅ Redis caching
-- ✅ Docker containerization
-- ✅ GPU acceleration support
-- ⏳ S3/Cloudflare R2 storage integration
-- ⏳ Advanced authentication
-- ⏳ Rate limiting
-- ⏳ Analytics dashboard
+-  Video upload and processing
+-  Real-time progress tracking
+-  Frame interpolation with AI
+-  Async job queue
+-  PostgreSQL persistence
+-  Redis caching
+-  Docker containerization
+-  GPU acceleration support
+-  S3/Cloudflare R2 storage integration
+-  Advanced authentication
+-  Rate limiting
+-  Analytics dashboard
 
 ## Development
 
@@ -314,16 +314,4 @@ psql -h localhost -U user -d infiniteflow
 - Check GPU memory availability
 - Review worker logs
 
-## License
 
-MIT License - see LICENSE file
-
-## Contributing
-
-Contributions welcome! Please read CONTRIBUTING.md
-
-## Support
-
-- Documentation: /docs
-- Issues: GitHub Issues
-- Email: support@infiniteflow.ai
