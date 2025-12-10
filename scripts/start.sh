@@ -3,7 +3,7 @@
 
 set -e
 
-echo "🚀 Starting InfiniteFlow AI Production Services..."
+echo " Starting InfiniteFlow AI Production Services..."
 echo ""
 
 # Colors for output

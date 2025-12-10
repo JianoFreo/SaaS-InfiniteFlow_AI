@@ -141,7 +141,7 @@ export default function Home() {
                 )}
                 {status === 'processing' && (
                   <div className="space-y-2">
-                    <p className="text-purple-300 text-lg font-semibold">🚀 Processing with AI...</p>
+                    <p className="text-purple-300 text-lg font-semibold"> Processing with AI...</p>
                     <p className="text-gray-400 text-sm">Generating interpolated frames</p>
                   </div>
                 )}

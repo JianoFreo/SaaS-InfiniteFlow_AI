@@ -4,7 +4,7 @@
 
 set -e
 
-echo "🚀 Setting up InfiniteFlow AI..."
+echo " Setting up InfiniteFlow AI..."
 
 # Check prerequisites
 check_prerequisites() {
