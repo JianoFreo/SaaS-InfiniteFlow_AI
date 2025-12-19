@@ -158,8 +158,50 @@ async function handlePromptSubmit(mode) {
 
 // Sidebar navigation: switch visible panel
 document.addEventListener('DOMContentLoaded', () => {
+    // Hamburger menu toggle
+    const hamburgerBtn = document.getElementById('hamburgerBtn');
+    const closeSidePanelBtn = document.getElementById('closeSidePanelBtn');
+    const sidePanel = document.getElementById('sidePanel');
+    const sideOverlay = document.getElementById('sideOverlay');
+
+    function openSidebar() {
+        sidePanel.classList.remove('-translate-x-full');
+        sideOverlay.classList.remove('-translate-x-full');
+        sideOverlay.style.left = '16rem'; // 64px (w-64)
+    }
+
+    function closeSidebar() {
+        sidePanel.classList.add('-translate-x-full');
+        sideOverlay.classList.add('-translate-x-full');
+        sideOverlay.style.left = '0';
+    }
+
+    if (hamburgerBtn) {
+        hamburgerBtn.addEventListener('click', openSidebar);
+    }
+
+    if (closeSidePanelBtn) {
+        closeSidePanelBtn.addEventListener('click', closeSidebar);
+    }
+
+    if (sideOverlay) {
+        sideOverlay.addEventListener('click', closeSidebar);
+    }
+
+    // Panel navigation
     const navButtons = document.querySelectorAll('[data-panel-target]');
     const panels = document.querySelectorAll('.panel-section');
+    const uploadSection = document.getElementById('uploadSection');
+    const headerTitle = document.querySelector('main .text-center h2');
+
+    const panelTitles = {
+        'panel-edit-1': 'Enhance Your Videos with AI',
+        'panel-edit-2': 'Enhance Your Videos with AI',
+        'panel-edit-3': 'Enhance Your Videos with AI',
+        'panel-settings': 'Settings',
+        'panel-about': 'About',
+        'panel-profile': 'Profile'
+    };
 
     function setActivePanel(targetId) {
         panels.forEach((panel) => {
@@ -178,6 +220,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 btn.classList.remove('sidebar-item-active');
             }
         });
+
+        // Show/hide upload section based on panel type
+        if (targetId.startsWith('panel-edit')) {
+            uploadSection.classList.remove('hidden');
+        } else {
+            uploadSection.classList.add('hidden');
+        }
+
+        // Update header title
+        if (headerTitle) {
+            headerTitle.textContent = panelTitles[targetId] || 'Enhance Your Videos with AI';
+        }
+
+        // Close sidebar on mobile after clicking
+        if (window.innerWidth < 768) {
+            sidePanel.classList.add('-translate-x-full');
+            sideOverlay.classList.add('-translate-x-full');
+        }
     }
 
     navButtons.forEach((btn) => {
@@ -193,3 +253,30 @@ document.addEventListener('DOMContentLoaded', () => {
         if (firstTarget) setActivePanel(firstTarget);
     }
 });
+
+// Profile Sign In / Sign Out
+function handleProfileSignIn() {
+    const email = document.getElementById('profileEmail')?.value.trim();
+    const password = document.getElementById('profilePassword')?.value.trim();
+    const statusEl = document.getElementById('profileStatus');
+
+    if (!email || !password) {
+        if (statusEl) statusEl.textContent = 'Please fill in both email and password.';
+        return;
+    }
+
+    // Simulate successful login (in production, this would call your backend)
+    document.getElementById('profileLoggedOut').classList.add('hidden');
+    document.getElementById('profileLoggedIn').classList.remove('hidden');
+    document.getElementById('profileUsername').textContent = email.split('@')[0];
+    if (statusEl) statusEl.textContent = 'Logged in successfully!';
+}
+
+function handleProfileSignOut() {
+    document.getElementById('profileLoggedOut').classList.remove('hidden');
+    document.getElementById('profileLoggedIn').classList.add('hidden');
+    document.getElementById('profileEmail').value = '';
+    document.getElementById('profilePassword').value = '';
+    const statusEl = document.getElementById('profileStatus');
+    if (statusEl) statusEl.textContent = 'Signed out.';
+}

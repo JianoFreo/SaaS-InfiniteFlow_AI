@@ -13,14 +13,18 @@
 
 <body class="bg-gradient-to-br from-gray-900 via-gray-800 to-black min-h-screen">
     <div class="flex min-h-screen">
-        <!-- Left Sidebar Navigation (ChatGPT-style) -->
-        <aside class="hidden md:flex md:flex-col w-64 glass border-r border-white/10 p-3 md:p-4 space-y-3">
-            <div class="flex items-center gap-2 mb-2">
-                <div
-                    class="w-6 h-6 md:w-8 md:h-8 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-                    <span class="text-white font-bold text-sm md:text-base">∞</span>
+        <!-- Left Sidebar Menu (Toggleable) -->
+        <aside id="sidePanel"
+            class="fixed left-0 top-0 h-screen w-64 glass border-r border-white/10 p-3 md:p-4 space-y-3 transform -translate-x-full transition-transform duration-300 z-[60]">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-2">
+                    <div
+                        class="w-6 h-6 md:w-8 md:h-8 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                        <span class="text-white font-bold text-sm md:text-base">∞</span>
+                    </div>
+                    <span class="text-sm md:text-base font-semibold text-white">InfiniteFlow</span>
                 </div>
-                <span class="text-sm md:text-base font-semibold text-white">InfiniteFlow AI</span>
+                <button id="closeSidePanelBtn" class="text-white text-2xl focus:outline-none">✕</button>
             </div>
 
             <div class="text-xs uppercase tracking-wide text-gray-400 mb-1">Photo editing modes</div>
@@ -29,16 +33,27 @@
             <button class="sidebar-item" data-panel-target="panel-edit-3">Prompt: Background clean-up</button>
 
             <div class="mt-auto pt-3 border-t border-white/10 space-y-2">
-                <button class="sidebar-item" data-panel-target="panel-settings">Settings</button>
-                <button class="sidebar-item" data-panel-target="panel-about">About</button>
+                <button class="sidebar-item" data-panel-target="panel-settings"> Settings</button>
+                <button class="sidebar-item" data-panel-target="panel-profile"> Profile</button>
+                <button class="sidebar-item" data-panel-target="panel-about">ⓘ About</button>
             </div>
         </aside>
+
+        <!-- Overlay (for all screen sizes) -->
+        <div id="sideOverlay"
+            class="fixed top-0 bottom-0 bg-black/50 transform -translate-x-full transition-all duration-300 z-[45]" style="left: 0; width: 100vw;">
+        </div>
 
         <!-- Main Column -->
         <div class="flex-1 flex flex-col">
             <!-- Navigation -->
-            <nav class="glass sticky top-0 z-50 border-b border-white/10">
+            <nav class="glass sticky top-0 z-40 border-b border-white/10">
                 <div class="py-3 md:py-4 flex items-center w-full px-4 md:px-6">
+                    <!-- Hamburger Menu -->
+                    <button id="hamburgerBtn" class="text-white text-2xl mr-3 focus:outline-none">
+                        ☰
+                    </button>
+
                     <!-- Logo: all the way to the left with padding -->
                     <div class="flex items-center gap-2 md:gap-3">
                         <div
@@ -48,7 +63,7 @@
                         <h1 class="text-lg md:text-xl font-bold text-white">InfiniteFlow</h1>
                     </div>
                     <!-- Watermark: all the way to the right -->
-                    <div class="watermark ml-auto">
+                    <div class="ml-auto">
                         <a href="https://github.com/JianoFreo" target="_blank" rel="noopener noreferrer">
                             <span
                                 class="text-xs md:text-lg font-bold text-white flex items-center gap-1 md:gap-2 whitespace-nowrap">
@@ -194,9 +209,9 @@
                     <!-- Settings -->
                     <div id="panel-settings" class="panel-section glass rounded-2xl p-5 md:p-8 hidden">
                         <h3 class="text-lg md:text-xl font-semibold text-white mb-2">Settings</h3>
-                        <p class="text-sm md:text-base text-gray-400 mb-4">Configure how InfiniteFlow AI and OpenAI
+                        <p class="text-sm md:text-base text-gray-400 mb-4">Configure how InfiniteFlow AI
                             should
-                            work together. These are placeholders you can later connect to real backend settings.</p>
+                            work. These are placeholders you can later connect to real backend settings.</p>
                         <div class="space-y-3 text-sm md:text-base text-gray-200">
                             <div class="flex flex-col gap-1">
                                 <span>OpenAI API key (kept only in this browser tab)</span>
@@ -205,7 +220,7 @@
                                     placeholder="sk-..." />
                             </div>
                             <div class="flex items-center justify-between">
-                                <span>Use OpenAI for style guidance</span>
+                                <span>Use AI for style guidance</span>
                                 <input type="checkbox" class="w-4 h-4" checked>
                             </div>
                             <div class="flex items-center justify-between">
@@ -220,16 +235,40 @@
                         </div>
                     </div>
 
+                    <!-- Profile -->
+                    <div id="panel-profile" class="panel-section glass rounded-2xl p-5 md:p-8 hidden">
+                        <h3 class="text-lg md:text-xl font-semibold text-white mb-2">Profile</h3>
+                        <div id="profileLoggedOut" class="space-y-3">
+                            <p class="text-sm md:text-base text-gray-400 mb-4">Sign in to save your edits and
+                                preferences.</p>
+                            <input id="profileEmail" type="email" placeholder="Email"
+                                class="w-full rounded-lg bg-black/40 border border-white/10 text-sm text-gray-100 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                            <input id="profilePassword" type="password" placeholder="Password"
+                                class="w-full rounded-lg bg-black/40 border border-white/10 text-sm text-gray-100 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                            <button onclick="handleProfileSignIn()"
+                                class="w-full px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold text-sm rounded-lg">Sign
+                                In</button>
+                        </div>
+                        <div id="profileLoggedIn" class="hidden space-y-3">
+                            <p class="text-sm text-gray-300">Welcome, <span id="profileUsername"
+                                    class="font-semibold text-white">User</span>!</p>
+                            <button onclick="handleProfileSignOut()"
+                                class="w-full px-4 py-2 bg-red-600/20 hover:bg-red-600/30 border border-red-500/50 text-red-300 font-semibold text-sm rounded-lg">Sign
+                                Out</button>
+                        </div>
+                        <p id="profileStatus" class="mt-3 text-xs text-gray-500"></p>
+                    </div>
+
                     <!-- About -->
                     <div id="panel-about" class="panel-section glass rounded-2xl p-5 md:p-8 hidden">
                         <h3 class="text-lg md:text-xl font-semibold text-white mb-2">About InfiniteFlow AI</h3>
                         <p class="text-sm md:text-base text-gray-400 mb-2">InfiniteFlow AI uses GPU-accelerated
                             interpolation
-                            to create smooth videos and can be extended with OpenAI prompts for creative video editing.
+                            to create smooth videos and can be extended with prompts for creative video editing.
                         </p>
                         <p class="text-xs md:text-sm text-gray-500">Use the options in the left navigation to choose how
                             you
-                            want to guide the AI. You can later wire these prompts to your backend to call OpenAI's
+                            want to guide the AI. You can later wire these prompts to your backend to call the
                             APIs.</p>
                     </div>
                 </section>
