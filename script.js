@@ -5,7 +5,7 @@ async function handleFileSelect(e) {
     document.getElementById('fileName').textContent = file.name;
     document.getElementById('uploadSection').classList.add('hidden');
     document.getElementById('processingSection').classList.remove('hidden');
-    document.getElementById('features').classList.add('hidden');
+    document.getElementById('featuresContainer').classList.add('hidden');
     document.getElementById('errorMessage').classList.add('hidden');
     document.getElementById('actionButtons').classList.add('hidden');
 
@@ -59,14 +59,14 @@ function showError(text) {
     document.getElementById('errorMessage').classList.remove('hidden');
     document.getElementById('processingSection').classList.add('hidden');
     document.getElementById('uploadSection').classList.remove('hidden');
-    document.getElementById('features').classList.remove('hidden');
+    document.getElementById('featuresContainer').classList.remove('hidden');
 }
 
 function handleReset() {
     document.getElementById('fileInput').value = '';
     document.getElementById('uploadSection').classList.remove('hidden');
     document.getElementById('processingSection').classList.add('hidden');
-    document.getElementById('features').classList.remove('hidden');
+    document.getElementById('featuresContainer').classList.remove('hidden');
     document.getElementById('errorMessage').classList.add('hidden');
     updateProgress(0);
 }
