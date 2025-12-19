@@ -166,14 +166,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function openSidebar() {
         sidePanel.classList.remove('-translate-x-full');
-        sideOverlay.classList.remove('-translate-x-full');
-        sideOverlay.style.left = '16rem'; // 64px (w-64)
+        sideOverlay.style.opacity = '1';
+        sideOverlay.style.pointerEvents = 'auto';
     }
 
     function closeSidebar() {
         sidePanel.classList.add('-translate-x-full');
-        sideOverlay.classList.add('-translate-x-full');
-        sideOverlay.style.left = '0';
+        sideOverlay.style.opacity = '0';
+        sideOverlay.style.pointerEvents = 'none';
     }
 
     if (hamburgerBtn) {
@@ -192,12 +192,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const navButtons = document.querySelectorAll('[data-panel-target]');
     const panels = document.querySelectorAll('.panel-section');
     const uploadSection = document.getElementById('uploadSection');
+    const mainCard = document.querySelector('.glass.rounded-2xl.md\\:rounded-3xl');
     const headerTitle = document.querySelector('main .text-center h2');
 
     const panelTitles = {
         'panel-edit-1': 'Enhance Your Videos with AI',
-        'panel-edit-2': 'Enhance Your Videos with AI',
-        'panel-edit-3': 'Enhance Your Videos with AI',
+        'panel-edit-2': 'Change Visual Style',
+        'panel-edit-3': 'Background Clean-up',
         'panel-settings': 'Settings',
         'panel-about': 'About',
         'panel-profile': 'Profile'
@@ -221,11 +222,13 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // Show/hide upload section based on panel type
+        // Show/hide upload section and main card based on panel type
         if (targetId.startsWith('panel-edit')) {
             uploadSection.classList.remove('hidden');
+            if (mainCard) mainCard.classList.remove('hidden');
         } else {
             uploadSection.classList.add('hidden');
+            if (mainCard) mainCard.classList.add('hidden');
         }
 
         // Update header title
