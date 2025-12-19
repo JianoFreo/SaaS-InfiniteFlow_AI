@@ -4,11 +4,83 @@ import { useEffect, useRef, useState } from 'react'
 import { Upload, CheckCircle, AlertCircle } from 'lucide-react'
 import { uploadVideo, getJobStatus, downloadVideo } from '../lib/api'
 
+type StatusKey = '' | 'uploading' | 'processing' | 'completed' | 'failed'
+
+const statusCopy: Record<Exclude<StatusKey, ''>, { title: string; desc: string; icon?: JSX.Element }> = {
+  uploading: {
+    title: '📤 Uploading...',
+    desc: 'Please wait while we process your video',
+  },
+  processing: {
+    title: ' Processing with AI...',
+    desc: 'Generating interpolated frames',
+  },
+  completed: {
+    title: 'Complete!',
+    desc: 'Your video is ready to download',
+    icon: <CheckCircle className="w-6 h-6 text-green-400" />,
+  },
+  failed: {
+    title: 'Failed',
+    desc: 'Something went wrong. Please retry.',
+  },
+}
+
+const features = [
+  { emoji: '⚡', title: 'Fast', desc: 'GPU-accelerated processing' },
+  { emoji: '🤖', title: 'Intelligent', desc: 'AI-generated frames' },
+  { emoji: '🎬', title: 'Smooth', desc: '2x frame rate playback' },
+]
+
+function UploadCard({ onSelect }: { onSelect: () => void }) {
+  return (
+    <div
+      onClick={onSelect}
+      className="border-2 border-dashed border-blue-400/50 rounded-2xl p-16 cursor-pointer hover:border-blue-400 hover:bg-blue-500/5 transition-all group"
+    >
+      <Upload className="w-16 h-16 text-blue-400 mx-auto mb-4 group-hover:scale-110 transition-transform" />
+      <h3 className="text-2xl font-bold text-white mb-2">Drop your video here</h3>
+      <p className="text-gray-400 mb-4">or click to browse</p>
+      <p className="text-sm text-gray-500">Supported: MP4, WebM, MOV (up to 500MB)</p>
+    </div>
+  )
+}
+
+function StatusBlock({ status }: { status: StatusKey }) {
+  if (!status || status === 'failed') return null
+  const copy = statusCopy[status]
+  return (
+    <div className="space-y-3 text-center">
+      <div className="flex items-center justify-center gap-2">
+        {copy.icon}
+        <p className={`text-lg font-semibold ${status === 'completed' ? 'text-green-400' : status === 'processing' ? 'text-purple-300' : 'text-blue-300'}`}>
+          {copy.title}
+        </p>
+      </div>
+      <p className="text-gray-400 text-sm">{copy.desc}</p>
+    </div>
+  )
+}
+
+function FeatureGrid() {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-16">
+      {features.map((feature) => (
+        <div key={feature.title} className="glass rounded-2xl p-8 text-center hover:bg-white/10 transition-all">
+          <div className="text-4xl mb-3">{feature.emoji}</div>
+          <h3 className="font-bold text-white mb-2">{feature.title}</h3>
+          <p className="text-gray-400 text-sm">{feature.desc}</p>
+        </div>
+      ))}
+    </div>
+  )
+}
+
 export default function Home() {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [fileName, setFileName] = useState('')
   const [jobId, setJobId] = useState<string | null>(null)
-  const [status, setStatus] = useState('')
+  const [status, setStatus] = useState<StatusKey>('')
   const [progress, setProgress] = useState(0)
   const [error, setError] = useState<string | null>(null)
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null)
@@ -117,15 +189,7 @@ export default function Home() {
           {!status ? (
             /* Upload Section */
             <div className="text-center">
-              <div
-                onClick={() => fileInputRef.current?.click()}
-                className="border-2 border-dashed border-blue-400/50 rounded-2xl p-16 cursor-pointer hover:border-blue-400 hover:bg-blue-500/5 transition-all group"
-              >
-                <Upload className="w-16 h-16 text-blue-400 mx-auto mb-4 group-hover:scale-110 transition-transform" />
-                <h3 className="text-2xl font-bold text-white mb-2">Drop your video here</h3>
-                <p className="text-gray-400 mb-4">or click to browse</p>
-                <p className="text-sm text-gray-500">Supported: MP4, WebM, MOV (up to 500MB)</p>
-              </div>
+              <UploadCard onSelect={() => fileInputRef.current?.click()} />
               <input
                 ref={fileInputRef}
                 type="file"
@@ -156,29 +220,7 @@ export default function Home() {
               </div>
 
               {/* Status */}
-              <div className="text-center">
-                {status === 'uploading' && (
-                  <div className="space-y-2">
-                    <p className="text-blue-300 text-lg font-semibold">📤 Uploading...</p>
-                    <p className="text-gray-400 text-sm">Please wait while we process your video</p>
-                  </div>
-                )}
-                {status === 'processing' && (
-                  <div className="space-y-2">
-                    <p className="text-purple-300 text-lg font-semibold"> Processing with AI...</p>
-                    <p className="text-gray-400 text-sm">Generating interpolated frames</p>
-                  </div>
-                )}
-                {status === 'completed' && (
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-center gap-2">
-                      <CheckCircle className="w-6 h-6 text-green-400" />
-                      <p className="text-green-400 text-lg font-semibold">Complete!</p>
-                    </div>
-                    <p className="text-gray-400 text-sm">Your video is ready to download</p>
-                  </div>
-                )}
-              </div>
+              <StatusBlock status={status} />
 
               {/* Action Buttons */}
               {status === 'completed' && (
@@ -225,25 +267,7 @@ export default function Home() {
         )}
 
         {/* Features */}
-        {!status && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-16">
-            <div className="glass rounded-2xl p-8 text-center hover:bg-white/10 transition-all">
-              <div className="text-4xl mb-3">⚡</div>
-              <h3 className="font-bold text-white mb-2">Fast</h3>
-              <p className="text-gray-400 text-sm">GPU-accelerated processing</p>
-            </div>
-            <div className="glass rounded-2xl p-8 text-center hover:bg-white/10 transition-all">
-              <div className="text-4xl mb-3">🤖</div>
-              <h3 className="font-bold text-white mb-2">Intelligent</h3>
-              <p className="text-gray-400 text-sm">AI-generated frames</p>
-            </div>
-            <div className="glass rounded-2xl p-8 text-center hover:bg-white/10 transition-all">
-              <div className="text-4xl mb-3">🎬</div>
-              <h3 className="font-bold text-white mb-2">Smooth</h3>
-              <p className="text-gray-400 text-sm">2x frame rate playback</p>
-            </div>
-          </div>
-        )}
+        {!status && <FeatureGrid />}
       </main>
     </div>
   )
