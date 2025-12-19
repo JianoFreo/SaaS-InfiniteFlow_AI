@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import get_settings
-from app.routes import health, processing
+from app.routes import health, processing, prompt
 from app.core.database import Base, engine
 
 # Create tables only if engine is available
@@ -32,6 +32,7 @@ app.add_middleware(
 # Include routers
 app.include_router(health.router)
 app.include_router(processing.router)
+app.include_router(prompt.router)
 
 @app.on_event("startup")
 async def startup_event():
