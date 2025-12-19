@@ -1,14 +1,17 @@
 'use client'
 
-import { useRef, useState } from 'react'
-import { Upload, CheckCircle, AlertCircle, Play } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import { Upload, CheckCircle, AlertCircle } from 'lucide-react'
+import { uploadVideo, getJobStatus, downloadVideo } from '../lib/api'
 
 export default function Home() {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [fileName, setFileName] = useState('')
+  const [jobId, setJobId] = useState<string | null>(null)
   const [status, setStatus] = useState('')
   const [progress, setProgress] = useState(0)
   const [error, setError] = useState<string | null>(null)
+  const [downloadUrl, setDownloadUrl] = useState<string | null>(null)
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -18,36 +21,12 @@ export default function Home() {
     setStatus('uploading')
     setError(null)
     setProgress(0)
+    setDownloadUrl(null)
 
     try {
-      const formData = new FormData()
-      formData.append('file', file)
-      
-      const response = await fetch('http://localhost:8000/upload', {
-        method: 'POST',
-        body: file,
-      })
-      
-      if (!response.ok) throw new Error('Upload failed')
-      
-      const data = await response.json()
+      const upload = await uploadVideo(file)
+      setJobId(upload.job_id)
       setStatus('processing')
-      
-      // Simulate progress
-      let currentProgress = 30
-      const interval = setInterval(() => {
-        currentProgress += Math.random() * 20
-        if (currentProgress > 95) currentProgress = 95
-        setProgress(Math.floor(currentProgress))
-      }, 500)
-      
-      // Simulate completion
-      setTimeout(() => {
-        clearInterval(interval)
-        setProgress(100)
-        setStatus('completed')
-      }, 3000)
-      
     } catch (err) {
       setError('Failed to upload video')
       setStatus('failed')
@@ -59,8 +38,53 @@ export default function Home() {
     setStatus('')
     setProgress(0)
     setError(null)
+    setJobId(null)
+    if (downloadUrl) {
+      URL.revokeObjectURL(downloadUrl)
+      setDownloadUrl(null)
+    }
     if (fileInputRef.current) fileInputRef.current.value = ''
   }
+
+  useEffect(() => {
+    if (!jobId || status !== 'processing') return
+
+    let cancelled = false
+    const interval = setInterval(async () => {
+      try {
+        const job = await getJobStatus(jobId)
+        if (cancelled) return
+
+        setProgress(job.progress || 0)
+
+        if (job.status === 'completed') {
+          clearInterval(interval)
+          setStatus('completed')
+          try {
+            const blob = await downloadVideo(jobId)
+            if (cancelled) return
+            const objectUrl = URL.createObjectURL(blob)
+            setDownloadUrl(objectUrl)
+          } catch (downloadErr) {
+            setError('Completed, but failed to fetch download.')
+          }
+        }
+
+        if (job.status === 'failed') {
+          clearInterval(interval)
+          setStatus('failed')
+          setError(job.error || 'Processing failed')
+        }
+      } catch (pollErr) {
+        setError('Failed to fetch status')
+      }
+    }, 1200)
+
+    return () => {
+      cancelled = true
+      clearInterval(interval)
+    }
+  }, [jobId, status])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black">
@@ -165,9 +189,19 @@ export default function Home() {
                   >
                     ↻ Process Another
                   </button>
-                  <button className="btn btn-primary">
-                    ⬇️ Download Video
-                  </button>
+                  {downloadUrl ? (
+                    <a
+                      href={downloadUrl}
+                      download={`optimized_${fileName || 'video'}`}
+                      className="btn btn-primary text-center"
+                    >
+                      ⬇️ Download Video
+                    </a>
+                  ) : (
+                    <button className="btn btn-primary" disabled>
+                      Preparing download...
+                    </button>
+                  )}
                 </div>
               )}
               {status === 'failed' && (
