@@ -1,5 +1,19 @@
 https://jianofreo.github.io/SaaS-InfiniteFlow_AI/
 
+
+<table>
+<tr>
+<td>
+<img src="assets/7b2a9dea-1c45-4ace-ab4d-e29f7d4db2fb.jpg" width="260">
+</td>
+<td align="right" valign="top">
+
+<img src="assets/17a1d1e8-7903-4a2a-82d9-fa2ad48e86e5.jpg" width="260">
+
+</td>
+</tr>
+</table>
+
 # InfiniteFlow AI - Video Frame Interpolation SaaS
 
 A machine learning SaaS platform that uses AI to interpolate video frames for smoother playback. Insert AI-generated frames between original frames using the RIFE model, enhanced with an intuitive ChatGPT-like UI with AI-powered prompts.
