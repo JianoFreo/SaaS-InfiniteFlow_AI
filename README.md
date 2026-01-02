@@ -1,3 +1,4 @@
+Github deployment is only for frontend prototype:
 https://jianofreo.github.io/SaaS-InfiniteFlow_AI/
 
 <div align="center">
