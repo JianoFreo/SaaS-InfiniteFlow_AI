@@ -106,11 +106,11 @@ InfiniteFlow AI is a full-stack SaaS application that combines:
 ```
 SaaS-InfiniteFlow_AI/
 │
-├── 📄 index.html                 # Main single-page app
-├── 📄 script.js                  # Core UI interactions
-├── 📄 uiConfig.js                # Dynamic UI configuration
-├── 📄 styles.css                 # Custom styling
-├── 📄 uiConfig.js                # Centralized UI config
+├── index.html                 # Main single-page app
+├── script.js                  # Core UI interactions
+├── uiConfig.js                # Dynamic UI configuration
+├── styles.css                 # Custom styling
+├── uiConfig.js                # Centralized UI config
 │
 ├── frontend/                      # Next.js full-stack (future upgrade)
 │   ├── src/
